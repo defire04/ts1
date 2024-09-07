@@ -1,27 +1,34 @@
-const taskInput = document.getElementById('taskInput');
-const addTaskBtn = document.getElementById('addTaskBtn');
-const taskList = document.getElementById('taskList');
-const clearCompletedBtn = document.getElementById('clearCompletedBtn');
-const filterBtns = document.querySelectorAll('.filterBtn');
+const taskInput: HTMLInputElement = document.getElementById('taskInput');
+const addTaskBtn: HTMLButtonElement = document.getElementById('addTaskBtn');
+const taskList: HTMLUListElement = document.getElementById('taskList');
+const clearCompletedBtn: HTMLButtonElement = document.getElementById('clearCompletedBtn');
+const filterBtns: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.filterBtn');
 
-let tasks = [];
+type Task = {
+  id: number;
+  text: string;
+  completed: boolean;
+  createdAt: Date;
+};
 
-function loadTasks() {
-  const savedTasks = localStorage.getItem('tasks');
+let tasks: Task[] = [];
+
+function loadTasks(): void {
+  const savedTasks: string | null = localStorage.getItem('tasks');
   if (savedTasks) {
     tasks = JSON.parse(savedTasks);
     renderTasks();
   }
 }
 
-function saveTasks() {
+function saveTasks(): void {
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-function addTask() {
-  const taskText = taskInput.value.trim();
+function addTask(): void {
+  const taskText: string = taskInput.value.trim();
   if (taskText) {
-    const newTask = {
+    const newTask: Task = {
       id: Date.now(),
       text: taskText,
       completed: false,
@@ -34,14 +41,14 @@ function addTask() {
   }
 }
 
-function deleteTask(taskId) {
+function deleteTask(taskId: number): void {
   tasks = tasks.filter(task => task.id !== taskId);
   saveTasks();
   renderTasks();
 }
 
-function toggleTaskCompletion(taskId) {
-  const task = tasks.find(task => task.id === taskId);
+function toggleTaskCompletion(taskId: number): void {
+  const task: Task | undefined = tasks.find(task => task.id === taskId);
   if (task) {
     task.completed = !task.completed;
     saveTasks();
@@ -49,14 +56,14 @@ function toggleTaskCompletion(taskId) {
   }
 }
 
-function clearCompletedTasks() {
+function clearCompletedTasks(): void {
   tasks = tasks.filter(task => !task.completed);
   saveTasks();
   renderTasks();
 }
 
-function filterTasks(filter) {
-  let filteredTasks;
+function filterTasks(filter: string): void {
+  let filteredTasks: Task[];
   switch (filter) {
     case 'active':
       filteredTasks = tasks.filter(task => !task.completed);
@@ -70,28 +77,28 @@ function filterTasks(filter) {
   renderTasks(filteredTasks);
 }
 
-function renderTasks(tasksToRender = tasks) {
+function renderTasks(tasksToRender: Task[] = tasks): void {
   taskList.innerHTML = '';
   tasksToRender.forEach(task => {
-    const li = document.createElement('li');
+    const li: HTMLLIElement = document.createElement('li');
     li.className = 'task-item';
     if (task.completed) {
       li.classList.add('completed');
     }
 
-    const checkbox = document.createElement('input');
+    const checkbox: HTMLInputElement = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = task.completed;
     checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
 
-    const taskText = document.createElement('span');
+    const taskText: HTMLSpanElement = document.createElement('span');
     taskText.textContent = task.text;
 
-    const deleteBtn = document.createElement('button');
+    const deleteBtn: HTMLButtonElement = document.createElement('button');
     deleteBtn.textContent = 'Delete';
     deleteBtn.addEventListener('click', () => deleteTask(task.id));
 
-    const createdAt = document.createElement('small');
+    const createdAt: HTMLElement = document.createElement('small');
     createdAt.textContent = `Created: ${task.createdAt.toLocaleString()}`;
 
     li.appendChild(checkbox);
@@ -104,7 +111,7 @@ function renderTasks(tasksToRender = tasks) {
 }
 
 addTaskBtn.addEventListener('click', addTask);
-taskInput.addEventListener('keypress', (e) => {
+taskInput.addEventListener('keypress', (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
     addTask();
   }
@@ -115,16 +122,16 @@ filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     filterBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    filterTasks(btn.dataset.filter);
+    filterTasks(btn.dataset.filter as string);
   });
 });
 
 loadTasks();
 
-function editTask(taskId) {
-  const task = tasks.find(task => task.id === taskId);
+function editTask(taskId: number): void {
+  const task: Task | undefined = tasks.find(task => task.id === taskId);
   if (task) {
-    const newText = prompt('Enter new task text:', task.text);
+    const newText: string | null = prompt('Enter new task text:', task.text);
     if (newText !== null) {
       task.text = newText.trim();
       saveTasks();
@@ -133,25 +140,25 @@ function editTask(taskId) {
   }
 }
 
-function sortTasks(sortBy) {
+function sortTasks(sortBy: 'date' | 'alphabetical' | 'completed'): void {
   switch (sortBy) {
     case 'date':
-      tasks.sort((a, b) => b.createdAt - a.createdAt);
+      tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       break;
     case 'alphabetical':
       tasks.sort((a, b) => a.text.localeCompare(b.text));
       break;
     case 'completed':
-      tasks.sort((a, b) => a.completed - b.completed);
+      tasks.sort((a, b) => Number(a.completed) - Number(b.completed));
       break;
   }
   renderTasks();
 }
 
-function getTasksStats() {
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const activeTasks = totalTasks - completedTasks;
+function getTasksStats(): { total: number; completed: number; active: number; completionRate: string } {
+  const totalTasks: number = tasks.length;
+  const completedTasks: number = tasks.filter(task => task.completed).length;
+  const activeTasks: number = totalTasks - completedTasks;
 
   return {
     total: totalTasks,
@@ -161,7 +168,7 @@ function getTasksStats() {
   };
 }
 
-function displayStats() {
+function displayStats(): void {
   const stats = getTasksStats();
   console.log('Task Statistics:');
   console.log(`Total tasks: ${stats.total}`);
@@ -170,12 +177,12 @@ function displayStats() {
   console.log(`Completion rate: ${stats.completionRate}`);
 }
 
-function exportTasks() {
-  const tasksJSON = JSON.stringify(tasks, null, 2);
-  const blob = new Blob([tasksJSON], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+function exportTasks(): void {
+  const tasksJSON: string = JSON.stringify(tasks, null, 2);
+  const blob: Blob = new Blob([tasksJSON], { type: 'application/json' });
+  const url: string = URL.createObjectURL(blob);
 
-  const a = document.createElement('a');
+  const a: HTMLAnchorElement = document.createElement('a');
   a.href = url;
   a.download = 'tasks.json';
   a.click();
@@ -183,12 +190,15 @@ function exportTasks() {
   URL.revokeObjectURL(url);
 }
 
-function importTasks(file) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
+function importTasks(file: File): void {
+  const reader: FileReader = new FileReader();
+  reader.onload = function(e: ProgressEvent<FileReader>) {
     try {
-      const importedTasks = JSON.parse(e.target.result);
-      tasks = importedTasks;
+      const importedTasks: Task[] = JSON.parse(e.target?.result as string);
+      tasks = importedTasks.map(task => ({
+        ...task,
+        createdAt: new Date(task.createdAt)
+      }));
       saveTasks();
       renderTasks();
       alert('Tasks successfully imported!');
