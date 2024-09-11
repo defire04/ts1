@@ -1,7 +1,4 @@
 # Todo List Application
-
-This is a simple Todo List application built with HTML, CSS, and JavaScript. It allows users to add, delete, and manage tasks in their browser.
-
 ## Features
 
 - Add new tasks
