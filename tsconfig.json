@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "ES6",
-    "lib": ["ES2016", "DOM"],  // Додано ES2016, яка включає Array.prototype.includes
+    "lib": ["ES2016", "DOM"],
     "outDir": "./assets/js",
     "rootDir": "./src",
     "strict": true,
